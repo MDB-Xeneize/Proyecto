@@ -1,0 +1,1 @@
+Hasta ahora esta base de datos tiene las tablas relacionadas entre si. La imagen es el diagrama entidad relacion (DER)
