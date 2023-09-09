@@ -1,55 +1,87 @@
 CREATE DATABASE backend;
 
-CREATE TABLE CHOFER (
-  dni INT NOT NULL UNIQUE,
-  id_chofer INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  apellido_nombre VARCHAR(20),
-  fecha_nacimiento DATE,
-  edad INT,
-  carnet VARCHAR(20)
+CREATE TABLE CHOFER
+(
+  apellido VARCHAR(20) NOT NULL,
+  nombre VARCHAR(20) NOT NULL,
+  dni VARCHAR(10) NOT NULL,
+  id_chofer INT NOT NULL auto_increment,
+  fecha_nacimiento DATE NOT NULL,
+  PRIMARY KEY (id_chofer),
+  UNIQUE (dni)
 );
 
-
-CREATE TABLE CAMIONES (
-  patente VARCHAR(20) NOT NULL ,
-  id_camion INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  marca VARCHAR(20),
-  capacidad_carga INT,
-  modelo VARCHAR(20),
-  peso_camion INT
+ CREATE TABLE VEHICULO
+(
+  carga_maxima INT NOT NULL,
+  id_vehiculo INT NOT NULL auto_increment,
+  marca VARCHAR(20) NOT NULL,
+  matricula VARCHAR(10) NOT NULL,
+  tara INT NOT NULL,
+  año INT NOT NULL,
+  modelo VARCHAR(20) NOT NULL,
+  PRIMARY KEY (id_vehiculo)
 );
 
-CREATE TABLE ENTRADA (
-  peso_entrada INT,
-  carga VARCHAR(20),
-  id_entrada INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  hora_entrada TIME,
-  fecha_entrada DATE,
+CREATE TABLE TIPO_VIAJE
+(
+  carga VARCHAR(20) NOT NULL,
+  nombre VARCHAR(10) NOT NULL,
+  id_tipo INT NOT NULL auto_increment,
+  PRIMARY KEY (id_tipo)
+);
+
+CREATE TABLE VIAJE
+(
+  carga VARCHAR (20),
+  id_viaje INT NOT NULL auto_increment,
+  destino VARCHAR(30) NOT NULL,
+  fecha DATE NOT NULL,
+  peso_carga INT NOT NULL,
+  peso_total INT NOT NULL,
+  origen VARCHAR(30) NOT NULL,
+  hora TIME NOT NULL,
   id_chofer INT NOT NULL,
+  id_vehiculo INT NOT NULL, -- Cambiado de 'matricula'
+  id_tipo INT NOT NULL,
+  PRIMARY KEY (id_viaje),
+  FOREIGN KEY (id_chofer) REFERENCES CHOFER(id_chofer),
+  FOREIGN KEY (id_vehiculo) REFERENCES VEHICULO(id_vehiculo), 
+  FOREIGN KEY (id_tipo) REFERENCES TIPO_VIAJE(id_tipo)
+);
+
+
+
+CREATE TABLE MANTENIMIENTO
+(
+  id_mantenimiento INT NOT NULL auto_increment,
+  service_proximo DATE NOT NULL,
+  fecha DATE NOT NULL,
+  observaciones VARCHAR(100) NOT NULL,
+  id_vehiculo INT NOT NULL,
+  PRIMARY KEY (id_mantenimiento),
+  FOREIGN KEY (id_vehiculo) REFERENCES VEHICULO(id_vehiculo)
+);
+
+CREATE TABLE USUARIO
+(
+  rol VARCHAR(15) NOT NULL,
+  id_usuario INT NOT NULL auto_increment,
+  permisos VARCHAR(20) NOT NULL,
+  password VARCHAR(20) NOT NULL,
+  nickname VARCHAR(20) NOT NULL,
+  email VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id_usuario),
+  UNIQUE (id_usuario),
+  UNIQUE (nickname)
+);
+
+CREATE TABLE gestiona
+(
   id_viaje INT NOT NULL,
-  id_camion INT NOT NULL,
-  FOREIGN KEY (id_camion) REFERENCES CAMIONES(id_camion),
-  FOREIGN KEY (id_chofer) REFERENCES CHOFER(dni)
-);
-
-CREATE TABLE SALIDA (
-  destino VARCHAR(20),
-  peso_salida INT,
-  fecha_salida DATE,
-  hora_salida TIME,
-  carga VARCHAR(20),
-  id_salida INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  id_chofer INT NOT NULL,
-  id_camion INT NOT NULL,
-  FOREIGN KEY (id_camion) REFERENCES CAMIONES(id_camion),
-  FOREIGN KEY (id_chofer) REFERENCES CHOFER(dni)
-);
-
-CREATE TABLE MANTENIMIENTO (
-  id_mantenimiento INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  id_camion INT NOT NULL,
-  service_ultimo DATE,
-  service_proximo DATE,
-  FOREIGN KEY (id_camion) REFERENCES CAMIONES(id_camion)
+  id_usuario INT NOT NULL,
+  PRIMARY KEY (id_viaje,id_usuario),
+  FOREIGN KEY (id_viaje) REFERENCES VIAJE(id_viaje),
+  FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
 );
 
