@@ -28,8 +28,8 @@ app.listen(8080,(err)=>{
 var connection = mysql.createConnection({
   host : 'localhost',
   user : 'root',
-  password : 'Mariano1997',
-  database : 'backend'
+  password : 'mariconmariadb',
+  database : 'bancked'
 });
 
 // conectarse a mysql
@@ -54,6 +54,33 @@ app.post('/api/chofer', (req, res) => {
           res.send("Se creó el chofer " + req.body.nombre + " " + req.body.apellido);
       }
   });
+});
+
+
+app.post('/api/login', (req, res) => {
+  params = req.body
+//  usuario_db.postBylog = function (usuario,funCallback) {
+      consulta = 'SELECT * FROM usuario WHERE nickname = ? and password = ?;';
+      params = [params.nickname, params.password];
+      connection.query(consulta,params,function (err, rows) {
+          if (err) {
+            res.status(500).send(err);
+              return;
+          } 
+              else {
+                res.json(rows);
+          }
+      });
+  //}
+  
+  // usuarioDb.postBylog(params,(err, resultado) => {
+  //     if (err) {
+  //         res.status(500).send(err);
+  //     } else{
+  //         res.json(resultado);
+  //     }
+  // });
+
 });
 
 // Se carga la tabla vehiculo
