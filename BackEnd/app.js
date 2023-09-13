@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('tiny'));
 app.use(bodyParser.json());
+app.use(express.static("public"));
 
 // FIN DECLARACIONES
 
@@ -60,7 +61,7 @@ app.post('/api/chofer', (req, res) => {
 app.post('/api/login', (req, res) => {
   params = req.body
 //  usuario_db.postBylog = function (usuario,funCallback) {
-      consulta = 'SELECT * FROM usuario WHERE nickname = ? and password = ?;';
+      consulta = 'SELECT nickname,permisos FROM usuario WHERE nickname = ? and password = ?;';
       params = [params.nickname, params.password];
       connection.query(consulta,params,function (err, rows) {
           if (err) {
@@ -68,7 +69,17 @@ app.post('/api/login', (req, res) => {
               return;
           } 
               else {
-                res.json(rows);
+                //res.json(rows);
+                console.log(rows);
+                const resultado=rows;
+                
+                if (resultado.length!=0) {
+                  // Si las credenciales son válidas, redirige al usuario a una página HTML en la carpeta "public"
+                  res.redirect('/menu/menu.html');
+                } else {
+                  // Si las credenciales no son válidas, redirige al usuario a una página HTML de error en la carpeta "public"
+                  res.redirect('/logeo/log.html');
+                }
           }
       });
   //}
