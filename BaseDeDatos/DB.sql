@@ -11,16 +11,15 @@ CREATE TABLE CHOFER
   UNIQUE (dni)
 );
 
- CREATE TABLE VEHICULO
+CREATE TABLE VEHICULO
 (
   carga_maxima INT NOT NULL,
-  id_vehiculo INT NOT NULL auto_increment,
   marca VARCHAR(20) NOT NULL,
   matricula VARCHAR(10) NOT NULL,
   tara INT NOT NULL,
   año INT NOT NULL,
   modelo VARCHAR(20) NOT NULL,
-  PRIMARY KEY (id_vehiculo)
+  PRIMARY KEY (matricula)
 );
 
 CREATE TABLE TIPO_VIAJE
@@ -33,24 +32,21 @@ CREATE TABLE TIPO_VIAJE
 
 CREATE TABLE VIAJE
 (
-  carga VARCHAR (20),
+  carga VARCHAR(20) NOT NULL,
   id_viaje INT NOT NULL auto_increment,
   destino VARCHAR(30) NOT NULL,
   fecha DATE NOT NULL,
-  peso_carga INT NOT NULL,
   peso_total INT NOT NULL,
   origen VARCHAR(30) NOT NULL,
   hora TIME NOT NULL,
   id_chofer INT NOT NULL,
-  id_vehiculo INT NOT NULL, -- Cambiado de 'matricula'
+  matricula VARCHAR(10) NOT NULL,
   id_tipo INT NOT NULL,
   PRIMARY KEY (id_viaje),
   FOREIGN KEY (id_chofer) REFERENCES CHOFER(id_chofer),
-  FOREIGN KEY (id_vehiculo) REFERENCES VEHICULO(id_vehiculo), 
+  FOREIGN KEY (matricula) REFERENCES VEHICULO(matricula),
   FOREIGN KEY (id_tipo) REFERENCES TIPO_VIAJE(id_tipo)
 );
-
-
 
 CREATE TABLE MANTENIMIENTO
 (
@@ -58,9 +54,9 @@ CREATE TABLE MANTENIMIENTO
   service_proximo DATE NOT NULL,
   fecha DATE NOT NULL,
   observaciones VARCHAR(100) NOT NULL,
-  id_vehiculo INT NOT NULL,
+  matricula VARCHAR(10) NOT NULL,
   PRIMARY KEY (id_mantenimiento),
-  FOREIGN KEY (id_vehiculo) REFERENCES VEHICULO(id_vehiculo)
+  FOREIGN KEY (matricula) REFERENCES VEHICULO(matricula)
 );
 
 CREATE TABLE USUARIO
