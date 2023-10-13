@@ -18,8 +18,10 @@ const vehiculo_db = {};
 
 // C = CREATE
 vehiculo_db.create = function (datos, funCallback) {
-    const consulta = "INSERT INTO vehiculo (carga_maxima, marca, matricula, tara, año, modelo) VALUES (?,?,?,?,?,?);";
-    const params = [datos.carga_maxima, datos.marca, datos.matricula, datos.tara, datos.año, datos.modelo];
+    const consulta = "INSERT INTO vehiculo (carga_maxima, marca, matricula, tara, ano, modelo) VALUES (?,?,?,?,?,?);";
+    console.log(typeof datos.carga_maxima);
+    console.log([parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara),parseInt(datos.ano), datos.modelo]);
+    params =[parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara),parseInt(datos.ano), datos.modelo];
 
     connection.query(consulta, params, (err, rows) => {
         if (err) {
@@ -59,15 +61,16 @@ vehiculo_db.getAll = function (funCallback) {
 }
 
 // U = UPDATE
-vehiculo_db.update = function (datos, matricula, funCallback) {
-    const consulta = "UPDATE vehiculo SET marca = ?, tara= ?, modelo = ? WHERE matricula = ?";
-    const params = [datos.matricula, datos.marca, datos.modelo, matricula];
-
+vehiculo_db.update = function (datos, id_vehiculo, funCallback) {
+    const consulta = "UPDATE vehiculo SET matricula = ?,marca = ?, modelo= ?, ano = ?,tara = ?,carga_maxima = ? WHERE id_vehiculo = ?";
+    const params = [datos.matricula,datos.marca, datos.modelo, datos.ano,datos.tara,datos.carga_maxima, parseInt(id_vehiculo)];
+    console.log(params);
+    console.log(typeof datos.ano);
     connection.query(consulta, params, (err, result) => {
         if (err) {
             if (err.code === "ER_DUP_ENTRY") {
                 funCallback({
-                    message: `Se modificó el vehículo ${datos.marca} ${datos.modelo}`,
+                    message: `Algunos datos estan duplicados no se modifico vehículo ${datos.marca} ${datos.modelo}`,
                     detail: err
                 });
             } else {
@@ -92,9 +95,10 @@ vehiculo_db.update = function (datos, matricula, funCallback) {
 
 
 // D = DELETE
-vehiculo_db.deleteVehiculo = function (placa, funCallback) {
-    const consulta = "DELETE FROM vehiculo WHERE matricula = ?";
-    connection.query(consulta, placa, (err, result) => {
+vehiculo_db.deleteVehiculo = function (id_vehiculo, funCallback) {
+    const consulta = "DELETE FROM vehiculo WHERE id_vehiculo = ?";
+    console.log(id_vehiculo,typeof id_vehiculo);
+    connection.query(consulta, id_vehiculo, (err, result) => {
         if (err) {
             funCallback({ message: err.code, detail: err });
         } else {

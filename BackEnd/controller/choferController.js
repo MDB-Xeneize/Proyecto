@@ -10,8 +10,8 @@ const chofer_db = require("model/chofer.js");
 // Rutas
 app.get('/', getAll);
 app.post('/', create);
-app.put('/:dni', update);
-app.delete('/:dni', deleteChofer);
+app.put('/:id_chofer', update);
+app.delete('/:id_chofer', deleteChofer);
 app.get('/:dni', getByDNI);
 app.get('/usuario/:dni', getUserByChofer);
 
@@ -40,8 +40,9 @@ function create(req, res) {
 
 function update(req, res) {
     let chofer = req.body;
-    let dni = req.params.dni;
-    chofer_db.update(chofer, dni, (err, resultado) => {
+    let id_chofer = parseInt(req.params.id_chofer);
+ 
+    chofer_db.update(chofer, id_chofer, (err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -51,15 +52,16 @@ function update(req, res) {
 }
 
 function deleteChofer(req, res) {
-    let dniChofer = req.params.dni;
-    chofer_db.deleteChofer(dniChofer, (err, resultModel) => {
+    let id_chofer = parseInt(req.params.id_chofer);
+    console.log(id_chofer);
+    chofer_db.deleteChofer(id_chofer, (err, resultModel) => {
         if (err) {
             res.status(500).send(err);
         } else {
             if (resultModel.detail.affectedRows == 0) {
                 res.status(404).send(resultModel.message);
             } else {
-                res.send(resultModel.message);
+                res.send(resultModel);
             }
         }
     });

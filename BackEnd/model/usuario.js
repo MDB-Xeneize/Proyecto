@@ -22,29 +22,29 @@ funCallback: en una funcion que la enviamos desde el endpoint del controlador, e
 
 // C = CREATE
 // usuarioController --> app.post('/', createUser);
-usuario_db.createUser = function (usuario, funcallback) {
-    consulta = "INSERT INTO USUARIO (rol, permisos, password, nickname, email) VALUES (?,?,?,?,?);";
-    params = [usuario.rol, usuario.permisos, usuario.password, usuario.nickname, usuario.email];
-
-    connection.query(consulta, params, (err, detail_bd) => {
+usuario_db.createUser = function (usuario, funCallback) {
+    const consulta = "INSERT INTO usuario (rol, permisos, password, nickname, email) VALUES (?,?,?,?,?);";
+    const params = [usuario.rol, parseInt(usuario.permisos), usuario.password, usuario.nickname, usuario.email];
+    console.log(params);
+    connection.query(consulta, params, (err, rows) => {
         if (err) {
 
             if (err.code == "ER_DUP_ENTRY") {
-                funcallback({
+                funCallback({
                     mensajito: "el usuario ya fue registrado",
                     detalle: err
                 });
             } else {
-                funcallback({
+                funCallback({
                     mensajito: "error diferente",
                     detalle: err
                 });
             }
         } else {
 
-            funcallback(undefined, {
-                mensajito: "se creo el usaurio " + usuario.nickname,
-                detalle: detail_bd
+            funCallback(undefined, {
+                mensajito: `Se creó el usuario ${usuario.nickname}`,
+                detail: rows
             });
         }
     });
@@ -53,7 +53,7 @@ usuario_db.createUser = function (usuario, funcallback) {
 //R = READ
 // usuarioController --> app.get('/', getAll);
 usuario_db.getAll = function (funCallback) {
-    var consulta = 'SELECT * FROM USUARIO';
+    var consulta = 'SELECT * FROM usuario';
     connection.query(consulta, function (err, rows) {
         if (err) {
             funCallback(err);
@@ -67,9 +67,9 @@ usuario_db.getAll = function (funCallback) {
 //U = UPDATE
 // usuarioController --> app.put('/:id_usuario', updateUser);
 usuario_db.updateUser = function (datos_usuario, id_usaurio, funcallback) {
-    params = [datos_usuario.mail, datos_usuario.nickname, datos_usuario.clave, id_usaurio]
-    consulta = "UPDATE USUARIO set mail = ?, nickname = ?, clave = ? WHERE id_usuario = ?;";
-
+    params = [datos_usuario.email, datos_usuario.nickname, datos_usuario.password, datos_usuario.permisos, datos_usuario.rol, parseInt(id_usaurio)]
+    consulta = "UPDATE usuario set email = ?, nickname = ?, password = ?, permisos= ?,rol =? WHERE id_usuario = ?;";
+    console.log(params);
     connection.query(consulta, params, (err, result) => {
         if (err) {
             if (err.code = "ER_TRUNCATED_WRONG_VALUE") {
@@ -95,7 +95,7 @@ usuario_db.updateUser = function (datos_usuario, id_usaurio, funcallback) {
                     detail: result
                 });
             }
-    
+
         }
     });
 
@@ -106,17 +106,23 @@ usuario_db.updateUser = function (datos_usuario, id_usaurio, funcallback) {
 // D = DELETE
 // usuarioController --> app.delete('/:id_usuario', deleteUser);
 usuario_db.deleteUser = function (id_usuario, retorno) {
-    consulta = "DELETE FROM USUARIO WHERE id_usuario = ?";
+    consulta = "DELETE FROM usuario WHERE id_usuario = ?";
     connection.query(consulta, id_usuario, (err, result) => {
         if (err) {
             retorno({ menssage: err.code, detail: err }, undefined);
 
         } else {
 
-            if (result.affectedRows == 0) {
-                retorno(undefined, { message: "no se encontro el usaurio, ingrese otro id", detail: result });
+            if (result.affectedRows === 0) {
+                retorno(undefined, {
+                    message: "no se encontro el usaurio, ingrese otro id",
+                    detail: result
+                });
             } else {
-                retorno(undefined, { message: "usuario eliminado", detail: result });
+                retorno(undefined, {
+                    message: `Se eliminó el usuario ${id_usuario}`,
+                    detail: result
+                });
             }
         }
     });

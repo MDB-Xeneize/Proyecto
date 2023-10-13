@@ -6,7 +6,7 @@ const mysql = require('mysql');
 const configuracion = require("config.json");
 
 // Inicializar la conexión con la base de datos
-var connection = mysql.createConnection(configuracion.database);
+const connection = mysql.createConnection(configuracion.database);
 connection.connect((err) => {
     if (err) {
         console.log(err);
@@ -19,8 +19,8 @@ var mantenimiento_db = {};
 
 // C = CREATE - Crear un mantenimiento
 mantenimiento_db.crearMantenimiento = function (datos, funCallback) {
-    consulta = "INSERT INTO mantenimiento (service_proximo, fecha, observaciones, matricula) VALUES (?, ?, ?, ?);";
-    params = [datos.service_proximo, datos.fecha, datos.observaciones, datos.matricula];
+    consulta = "INSERT INTO mantenimiento (service_proximo, fecha, observaciones, id_vehiculo) VALUES (?, ?, ?, ?);";
+    params = [datos.service_proximo, datos.fecha, datos.observaciones,parseInt(datos.id_vehiculo)];
 
     connection.query(consulta, params, (err, result) => {
         if (err) {
@@ -46,8 +46,7 @@ mantenimiento_db.crearMantenimiento = function (datos, funCallback) {
 
 // R = READ - Obtener todos los mantenimientos
 mantenimiento_db.getAll = function (funCallback) {
-    var consulta = 'SELECT mantenimiento.*, vehiculo.marca AS vehiculo_marca FROM mantenimiento ' +
-                   'INNER JOIN vehiculo ON mantenimiento.matricula = vehiculo.matricula';
+    var consulta = 'SELECT * from mantenimiento INNER JOIN vehiculo ON mantenimiento.id_vehiculo = vehiculo.id_vehiculo';
     connection.query(consulta, function (err, rows) {
         if (err) {
             funCallback({
@@ -61,31 +60,32 @@ mantenimiento_db.getAll = function (funCallback) {
 }
 
 // U = UPDATE - Actualizar un mantenimiento por ID
-mantenimiento_db.actualizarMantenimiento = function (datos, id, funCallback) {
-    consulta = "UPDATE mantenimiento SET service_proximo = ?, fecha = ?, observaciones = ?, matricula = ? WHERE id_mantenimiento = ?";
-    params = [datos.service_proximo, datos.fecha, datos.observaciones, datos.matricula, id];
+mantenimiento_db.actualizarMantenimiento = function (datos, id_mantenimiento, funCallback) {
+    const consulta = "UPDATE mantenimiento SET service_proximo = ?, fecha = ?, observaciones = ?, id_vehiculo = ? WHERE id_mantenimiento = ?";
+    const params = [datos.service_proximo, datos.fecha, datos.observaciones,parseInt(datos.id_vehiculo),parseInt(id_mantenimiento)];
+    console.log(params,consulta);
 
     connection.query(consulta, params, (err, result) => {
         if (err) {
-            if (err.code == "ER_DUP_ENTRY") { // Mantenimiento duplicado
+            if (err.code == "ER_DUP_ENTRY") { 
                 funCallback({
                     message: "Los datos a insertar generan un mantenimiento duplicado",
                     detail: err
                 });
-            } else { // Otro código de error
+            } else {
                 funCallback({
                     message: "Error diferente, analizar código de error",
                     detail: err
                 });
             }
-        } else if (result.affectedRows == 0) { // Mantenimiento a actualizar no encontrado
+        } else if (result.affectedRows == 0) { 
             funCallback({
                 message: "No existe un mantenimiento que coincida con el criterio de búsqueda",
                 detail: result
             });
         } else {
-            funcallback(undefined, {
-                message: `Se modificó el mantenimiento con ID ${id}`,
+            funCallback(undefined, {
+                message: `Se modificó el mantenimiento con ID ${id_mantenimiento}`,
                 detail: result
             });
         }
@@ -93,9 +93,11 @@ mantenimiento_db.actualizarMantenimiento = function (datos, id, funCallback) {
 }
 
 // D = DELETE - Eliminar un mantenimiento por ID
-mantenimiento_db.borrarMantenimiento = function (id, funCallback) {
+mantenimiento_db.borrarMantenimiento = function (id_mantenimiento, funCallback) {
     consulta = "DELETE FROM mantenimiento WHERE id_mantenimiento = ?";
-    connection.query(consulta, id, (err, result) => {
+    id_mantenimiento=parseInt(id_mantenimiento);
+    console.log(id_mantenimiento);
+    connection.query(consulta, id_mantenimiento, (err, result) => {
         if (err) {
             funCallback({ message: err.code, detail: err });
         } else {
@@ -106,7 +108,7 @@ mantenimiento_db.borrarMantenimiento = function (id, funCallback) {
                         detail: result
                     });
             } else {
-                funCallback(undefined, { message: "Mantenimiento eliminado", detail: result });
+                funCallback(undefined, { message: `Eliminado Registro de mantenimiento ${id_mantenimiento} `, detail: result });
             }
         }
     });

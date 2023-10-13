@@ -35,6 +35,7 @@ function getAll(req, res) {
 
 function createUser(req, res) {
     let usuario = req.body;
+    console.log(usuario)
     usuarioDb.createUser(usuario, (err, resultado) => {
         if (err) {
             res.status(500).send(err);
@@ -48,6 +49,7 @@ function createUser(req, res) {
 function updateUser(req, res) {
     let datos_usuario = req.body; //aquellos datos que quiero reemplazar, modificar, etc 
     let id_usaurio = req.params.id_usuario //para identificarlo dentro de la base de datos
+    console.log(datos_usuario,id_usaurio);
     usuarioDb.updateUser(datos_usuario, id_usaurio, (err,resultado) => {
         if (err) {
             res.status(500).send(err);
@@ -64,9 +66,9 @@ function deleteUser(req, res) {
             res.status(500).send(err);
         } else {
             if (result_model.detail.affectedRows == 0) {
-                res.status(404).send(result_model.message);
+                res.status(404).send(result_model);
             } else {
-                res.send(result_model.message);
+                res.send(result_model);
             }
         }
     });

@@ -10,8 +10,8 @@ const vehiculo_db = require("model/vehiculo.js");
 // Rutas
 app.get('/', getAll);
 app.post('/', create);
-app.put('/:matricula', update);
-app.delete('/:matricula', deleteVehiculo);
+app.put('/:id_vehiculo', update);
+app.delete('/:id_vehiculo', deleteVehiculo);
 app.get('/:id_vehiculo', getBymatricula);
 
 // Funciones utilizadas en endpoints
@@ -39,8 +39,8 @@ function create(req, res) {
 
 function update(req, res) {
     let vehiculo = req.body;
-    let placa = req.params.placa;
-    vehiculo_db.update(vehiculo, placa, (err, resultado) => {
+    let id_vehiculo = req.params.id_vehiculo;
+    vehiculo_db.update(vehiculo, id_vehiculo, (err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -50,15 +50,16 @@ function update(req, res) {
 }
 
 function deleteVehiculo(req, res) {
-    let matriculaVehiculo = req.params.matricula;
-    vehiculo_db.deleteVehiculo(matriculaVehiculo, (err, resultModel) => {
+    let id_vehiculo = parseInt(req.params.id_vehiculo);
+    
+    vehiculo_db.deleteVehiculo(id_vehiculo, (err, resultModel) => {
         if (err) {
             res.status(500).send(err);
         } else {
             if (resultModel.detail.affectedRows == 0) {
                 res.status(404).send(resultModel.message);
             } else {
-                res.send(resultModel.message);
+                res.send(resultModel); 
             }
         }
     });

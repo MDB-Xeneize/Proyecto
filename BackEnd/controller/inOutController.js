@@ -34,7 +34,7 @@ app.get('/:id_viaje', (req, res) => {
 
 app.get('/agregar/chofer', (req, res) => {
 
-    inOutDb.getAllchofer((err, resultado) => {
+    inOutDb.getAllChofer((err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else{
@@ -45,7 +45,7 @@ app.get('/agregar/chofer', (req, res) => {
 
 app.get('/agregar/vehiculo', (req, res) => {
 
-    inOutDb.getAllvehiculo((err, resultado) => {
+    inOutDb.getAllVehiculo((err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else{
@@ -53,5 +53,51 @@ app.get('/agregar/vehiculo', (req, res) => {
         }
     });
 });
+
+app.post('/', (req, res) => {
+
+    let registro = req.body;
+    inOutDb.create(registro, (err, resultado) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            //res.send(rows);
+            res.send(resultado);
+        }
+    });
+
+});
+
+app.put('/:id_viaje' , (req, res) => {
+    let registro_put = req.body;
+    let id_viaje_put = req.params.id_viaje;
+    inOutDb.modificar(registro_put,id_viaje_put, (err ,resultado) => {
+        if (err){
+            res.status(500).send(err);
+        }
+        else{
+            res.send(resultado);
+        }
+    });
+});
+///
+
+app.delete('/:id_viaje/:id_tipo/:seleccion' , (req, res) => {
+    const id_viaje_borrar = req.params.id_viaje;
+    const id_tipo_borrar = req.params.id_tipo;
+    const seleccion = req.params.seleccion;
+    const seleccionDecodificada = decodeURIComponent(seleccion);
+    const seleccionJSON = JSON.parse(seleccionDecodificada);
+    console.log(req.params.id_viaje,req.params.id_tipo,seleccionJSON);
+    inOutDb.borrar(id_viaje_borrar,id_tipo_borrar,seleccionJSON, (err ,resultado) => {
+        if (err){
+            res.status(500).send(err);
+        }
+        else{
+            res.send(resultado);
+        }
+    });
+});
+
 
 module.exports = app;

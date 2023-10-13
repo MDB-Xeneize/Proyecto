@@ -18,7 +18,7 @@ const controladorChofer = require("controller/choferController.js");
 const controladorVehiculo = require("controller/vehiculoController.js");
 const controladorMantenimiento = require("controller/mantenimientoController.js");
 const controladorTipo_Viaje = require("controller/tipo_ViajeController.js");
-const controladorViaje = require("controller/viajeController.js");
+const controladorViaje = require("controller/inOutController.js");
 const controladorGestiona = require("controller/gestionaController.js");
 
 // Rutas de controladores
@@ -28,7 +28,7 @@ app.use('/api/chofer', controladorChofer);
 app.use('/api/vehiculo', controladorVehiculo);
 app.use('/api/mantenimiento', controladorMantenimiento);
 app.use('/api/tipo_viaje', controladorTipo_Viaje);
-app.use('/api/viaje', controladorViaje);
+app.use('/api/inOut', controladorViaje);
 app.use('/api/gestiona', controladorGestiona);
 
 app.listen(configuracion.server.port, (err) => {

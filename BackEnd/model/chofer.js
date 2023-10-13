@@ -37,7 +37,7 @@ chofer_db.create = function (datos, funCallback) {
         } else {
             funCallback(undefined, {
                 message: `Se creó el chofer ${datos.nombre} ${datos.apellido}`,
-                
+
             });
         }
     });
@@ -59,9 +59,9 @@ chofer_db.getAll = function (funCallback) {
 }
 
 // U = UPDATE
-chofer_db.update = function (datos, dni, funCallback) {
-    const consulta = "UPDATE CHOFER SET apellido = ?, nombre = ?, fecha_nacimiento = ? WHERE dni = ?";
-    const params = [datos.apellido, datos.nombre, datos.fecha_nacimiento, dni];
+chofer_db.update = function (datos, id_chofer, funCallback) {
+    const consulta = "UPDATE chofer SET apellido = ?, nombre = ?, fecha_nacimiento = ?, dni=? WHERE id_chofer = ?";
+    const params = [datos.apellido, datos.nombre, datos.fecha_nacimiento, datos.dni, id_chofer];
 
     connection.query(consulta, params, (err, result) => {
         if (err) {
@@ -91,11 +91,12 @@ chofer_db.update = function (datos, dni, funCallback) {
 }
 
 // D = DELETE
-chofer_db.deleteChofer = function (dni_chofer, funCallback) {
+chofer_db.deleteChofer = function (id_chofer, funCallback) {
     // Aplicamos trim() para eliminar espacios en blanco alrededor del valor del DNI
-    const dni_choferLimpio = dni_chofer.trim();
-    const consulta = "DELETE FROM CHOFER WHERE dni = ?";
-    connection.query(consulta, [dni_choferLimpio], (err, result) => {
+    //const dni_choferLimpio = dni_chofer.trim();
+    const id_choferLimpio = id_chofer;
+    const consulta = "DELETE FROM chofer WHERE id_chofer = ?";
+    connection.query(consulta, [id_choferLimpio], (err, result) => {
         if (err) {
             funCallback({ message: err.code, detail: err });
         } else {
@@ -105,7 +106,10 @@ chofer_db.deleteChofer = function (dni_chofer, funCallback) {
                     detail: result
                 });
             } else {
-                funCallback(undefined, { message: "Chofer eliminado", detail: result });
+                funCallback(undefined, {
+                    message: "Chofer eliminado",
+                    detail: result
+                });
             }
         }
     });
@@ -138,7 +142,7 @@ chofer_db.getByDNI = function (dni, funCallback) {
 // Obtener usuario por chofer
 chofer_db.getUserByChofer = function (chofer, funCallback) {
     const consulta = "SELECT nickname FROM usuario INNER JOIN chofer ON usuario.chofer = chofer.dni AND usuario.chofer = ?";
-    
+
     connection.query(consulta, chofer, (err, result) => {
         if (err) {
             funCallback({
