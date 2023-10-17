@@ -7,8 +7,9 @@ app.use(express.urlencoded({ extended: true }));
 
 const vehiculo_db = require("model/vehiculo.js");
 
+const auth = require("config/auth.js");
 // Rutas
-app.get('/', getAll);
+app.get('/', auth.verificarToken, getAll);
 app.post('/', create);
 app.put('/:id_vehiculo', update);
 app.delete('/:id_vehiculo', deleteVehiculo);
@@ -51,11 +52,15 @@ function update(req, res) {
 
 function deleteVehiculo(req, res) {
     let id_vehiculo = parseInt(req.params.id_vehiculo);
-    
+    console.log(id_vehiculo,'aqui')
     vehiculo_db.deleteVehiculo(id_vehiculo, (err, resultModel) => {
         if (err) {
-            res.status(500).send(err);
-        } else {
+
+                res.status(500).send(err);
+            
+        }
+
+        else {
             if (resultModel.detail.affectedRows == 0) {
                 res.status(404).send(resultModel.message);
             } else {

@@ -20,8 +20,8 @@ const vehiculo_db = {};
 vehiculo_db.create = function (datos, funCallback) {
     const consulta = "INSERT INTO vehiculo (carga_maxima, marca, matricula, tara, ano, modelo) VALUES (?,?,?,?,?,?);";
     console.log(typeof datos.carga_maxima);
-    console.log([parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara),parseInt(datos.ano), datos.modelo]);
-    params =[parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara),parseInt(datos.ano), datos.modelo];
+    console.log([parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara), parseInt(datos.ano), datos.modelo]);
+    params = [parseInt(datos.carga_maxima), datos.marca, datos.matricula, parseInt(datos.tara), parseInt(datos.ano), datos.modelo];
 
     connection.query(consulta, params, (err, rows) => {
         if (err) {
@@ -63,7 +63,7 @@ vehiculo_db.getAll = function (funCallback) {
 // U = UPDATE
 vehiculo_db.update = function (datos, id_vehiculo, funCallback) {
     const consulta = "UPDATE vehiculo SET matricula = ?,marca = ?, modelo= ?, ano = ?,tara = ?,carga_maxima = ? WHERE id_vehiculo = ?";
-    const params = [datos.matricula,datos.marca, datos.modelo, datos.ano,datos.tara,datos.carga_maxima, parseInt(id_vehiculo)];
+    const params = [datos.matricula, datos.marca, datos.modelo, datos.ano, datos.tara, datos.carga_maxima, parseInt(id_vehiculo)];
     console.log(params);
     console.log(typeof datos.ano);
     connection.query(consulta, params, (err, result) => {
@@ -97,18 +97,30 @@ vehiculo_db.update = function (datos, id_vehiculo, funCallback) {
 // D = DELETE
 vehiculo_db.deleteVehiculo = function (id_vehiculo, funCallback) {
     const consulta = "DELETE FROM vehiculo WHERE id_vehiculo = ?";
-    console.log(id_vehiculo,typeof id_vehiculo);
+    console.log(id_vehiculo);
     connection.query(consulta, id_vehiculo, (err, result) => {
         if (err) {
-            funCallback({ message: err.code, detail: err });
-        } else {
+            if (err.code === "ER_ROW_IS_REFERENCED_2") {
+                funCallback({
+                    message: `El vehículo está asociado a registros de mantenimiento; elimine primero todos los de id ${id_vehiculo}`,
+                    detail: "Este vehículo no puede ser eliminado ya que está asociado a registros de mantenimiento. Por favor, elimine primero los registros de mantenimiento relacionados con este vehículo."
+              
+                }, 500);
+            } else {
+                funCallback({ message: err.code, detail: err }, 500);
+            }
+        }
+        else {
             if (result.affectedRows === 0) {
                 funCallback(undefined, {
                     message: "No se encontró un vehículo con la matricula ingresada",
                     detail: result
                 });
             } else {
-                funCallback(undefined, { message: "Vehículo eliminado", detail: result });
+                funCallback(undefined, {
+                    message: "Vehículo eliminado",
+                    detail: result
+                });
             }
         }
     });

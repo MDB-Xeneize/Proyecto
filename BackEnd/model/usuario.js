@@ -1,8 +1,10 @@
 require('rootpath')();
 const mysql = require('mysql');
-const configuracion = require("config.json");
+const config = require("config/config.json");
+const bcrypt = require('bcrypt');
 
-var connection = mysql.createConnection(configuracion.database);
+
+var connection = mysql.createConnection(config.database);
 connection.connect((err) => {
     if (err) {
         console.log(err);
@@ -19,36 +21,40 @@ usuario_db : es un objeto que sera invocado desde los endpoint del controlador. 
 funCallback: en una funcion que la enviamos desde el endpoint del controlador, es mediante esta funcion que le damos una respuesta desde el MODEL hacia el CONTROLLER, aquí lo que enviamos como error o detalles con mensajes, es lo que recibira usuarioController para seguir su proceso de respuesta hacia el forontend
 */
 
+// -----------------------------------------------------------------------------
 
 // C = CREATE
 // usuarioController --> app.post('/', createUser);
-usuario_db.createUser = function (usuario, funCallback) {
+usuario_db.create = function (usuario, funcallback) {
+    let claveCifrada = bcrypt.hashSync(usuario.password, 10);
     const consulta = "INSERT INTO usuario (rol, permisos, password, nickname, email) VALUES (?,?,?,?,?);";
-    const params = [usuario.rol, parseInt(usuario.permisos), usuario.password, usuario.nickname, usuario.email];
-    console.log(params);
-    connection.query(consulta, params, (err, rows) => {
+    //params = [usuario.mail, usuario.nickname, claveCifrada, usuario.persona];
+    const params = [usuario.rol, parseInt(usuario.permisos), claveCifrada, usuario.nickname, usuario.email];
+    connection.query(consulta, params, (err, detail_bd) => {
         if (err) {
 
             if (err.code == "ER_DUP_ENTRY") {
-                funCallback({
-                    mensajito: "el usuario ya fue registrado",
+                funcallback({
+                    message: "el usuario ya fue registrado",
                     detalle: err
                 });
             } else {
-                funCallback({
-                    mensajito: "error diferente",
+                funcallback({
+                    message: "error diferente",
                     detalle: err
                 });
             }
         } else {
 
-            funCallback(undefined, {
-                mensajito: `Se creó el usuario ${usuario.nickname}`,
-                detail: rows
+            funcallback(undefined, {
+                message: "se creo el usaurio " + usuario.nickname,
+                detalle: detail_bd
             });
         }
     });
 }
+
+// -----------------------------------------------------------------------------
 
 //R = READ
 // usuarioController --> app.get('/', getAll);
@@ -66,10 +72,12 @@ usuario_db.getAll = function (funCallback) {
 
 //U = UPDATE
 // usuarioController --> app.put('/:id_usuario', updateUser);
-usuario_db.updateUser = function (datos_usuario, id_usaurio, funcallback) {
-    params = [datos_usuario.email, datos_usuario.nickname, datos_usuario.password, datos_usuario.permisos, datos_usuario.rol, parseInt(id_usaurio)]
+usuario_db.update = function (datos_usuario, id_usaurio, funcallback) {
+    let claveCifrada = bcrypt.hashSync(datos_usuario.password, 10);
+    params = [datos_usuario.email, datos_usuario.nickname, claveCifrada, datos_usuario.permisos, datos_usuario.rol, parseInt(id_usaurio)]
+    //params = [datos_usuario.mail, datos_usuario.nickname, claveCifrada, id_usaurio]
     consulta = "UPDATE usuario set email = ?, nickname = ?, password = ?, permisos= ?,rol =? WHERE id_usuario = ?;";
-    console.log(params);
+
     connection.query(consulta, params, (err, result) => {
         if (err) {
             if (err.code = "ER_TRUNCATED_WRONG_VALUE") {
@@ -95,39 +103,65 @@ usuario_db.updateUser = function (datos_usuario, id_usaurio, funcallback) {
                     detail: result
                 });
             }
-
         }
     });
-
-
-
 }
+
+// -----------------------------------------------------------------------------
 
 // D = DELETE
 // usuarioController --> app.delete('/:id_usuario', deleteUser);
-usuario_db.deleteUser = function (id_usuario, retorno) {
+usuario_db.borrar = function (id_usuario, funCallback) {
     consulta = "DELETE FROM usuario WHERE id_usuario = ?";
+    console.log(id_usuario)
     connection.query(consulta, id_usuario, (err, result) => {
         if (err) {
-            retorno({ menssage: err.code, detail: err }, undefined);
+            funCallback({ menssage: err.code, detail: err });//, undefined
 
         } else {
 
             if (result.affectedRows === 0) {
-                retorno(undefined, {
+                funCallback(undefined, { 
                     message: "no se encontro el usaurio, ingrese otro id",
-                    detail: result
+                    detail: result 
                 });
             } else {
-                retorno(undefined, {
-                    message: `Se eliminó el usuario ${id_usuario}`,
-                    detail: result
+                funCallback(undefined, { 
+                    message: "usuario eliminado", 
+                    detail: result 
                 });
             }
         }
     });
 }
 
+// -----------------------------------------------------------------------------
 
+//securityController --> app.post('/login', login);
+usuario_db.findByNickname = function (nickname, funCallback) {
+    var consulta = 'SELECT * FROM usuario WHERE nickname = ?';  
+    console.log(nickname) 
+    // var consulta = 'SELECT usuario.*, rol.nombre FROM usuario INNER JOIN rol ON usuario.rol_id = rol.rol_id AND usuario.nickname = ?';
+    connection.query(consulta, nickname, function (err, result) {
+        if (err) {
+            funCallback(err);
+            return;
+        } else {
+
+            if (result.length > 0) {
+                funCallback(undefined, {
+                    message: `Usuario encontrado`,
+                    detail: result[0]
+                });
+            } 
+            else {
+                funCallback({
+                    message: "No existe un usuario que coincida con el criterio de busqueda",
+                    detail: result
+                });
+            }
+        }
+    });
+}
 
 module.exports = usuario_db;

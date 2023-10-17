@@ -7,11 +7,12 @@ app.use(express.urlencoded({ extended: true }));
 
 const chofer_db = require("model/chofer.js");
 
+const auth = require("config/auth.js");
 // Rutas
-app.get('/', getAll);
-app.post('/', create);
-app.put('/:id_chofer', update);
-app.delete('/:id_chofer', deleteChofer);
+app.get('/', auth.verificarToken, getAll);
+app.post('/', auth.verificarToken, create);
+app.put('/:id_chofer', auth.verificarToken, update);
+app.delete('/:id_chofer', auth.verificarToken, deleteChofer);
 app.get('/:dni', getByDNI);
 app.get('/usuario/:dni', getUserByChofer);
 

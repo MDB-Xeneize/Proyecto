@@ -6,14 +6,18 @@ app.use(express.urlencoded({ extended: true }));
 
 var usuarioDb = require("model/usuario.js");
 
+const auth = require("config/auth.js");
+
+
+
 // -------------------------------------------------------- 
 // --rutas de escucha (endpoint) dispoibles para USUARIOS-- 
 // -------------------------------------------------------- 
 
-app.get('/', getAll);
-app.post('/', createUser);
-app.put('/:id_usuario', updateUser);
-app.delete('/:id_usuario', deleteUser);
+app.get('/', auth.verificarToken, getAll);
+app.post('/',auth.verificarToken,  createUser);
+app.put('/:id_usuario',auth.verificarToken, updateUser);
+app.delete('/:id_usuario',auth.verificarToken, deleteUser);
 
 
 // -------------------------------------------------------- 
@@ -35,8 +39,7 @@ function getAll(req, res) {
 
 function createUser(req, res) {
     let usuario = req.body;
-    console.log(usuario)
-    usuarioDb.createUser(usuario, (err, resultado) => {
+    usuarioDb.create(usuario, (err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -49,8 +52,7 @@ function createUser(req, res) {
 function updateUser(req, res) {
     let datos_usuario = req.body; //aquellos datos que quiero reemplazar, modificar, etc 
     let id_usaurio = req.params.id_usuario //para identificarlo dentro de la base de datos
-    console.log(datos_usuario,id_usaurio);
-    usuarioDb.updateUser(datos_usuario, id_usaurio, (err,resultado) => {
+    usuarioDb.update(datos_usuario, id_usaurio, (err, resultado) => {
         if (err) {
             res.status(500).send(err);
         } else {
@@ -61,19 +63,21 @@ function updateUser(req, res) {
 
 
 function deleteUser(req, res) {
-    usuarioDb.deleteUser(req.params.id_usuario, (err, result_model) => {
+    console.log(req.params.id_usaurio)
+    usuarioDb.borrar(req.params.id_usuario, (err, result_model) => {
         if (err) {
             res.status(500).send(err);
         } else {
             if (result_model.detail.affectedRows == 0) {
-                res.status(404).send(result_model);
+                res.status(404).send(result_model.message);
             } else {
-                res.send(result_model);
+                res.send(result_model.message);
             }
         }
     });
 }
 
 module.exports = app;
+
 
 
