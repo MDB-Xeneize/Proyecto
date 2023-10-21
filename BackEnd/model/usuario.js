@@ -114,6 +114,7 @@ usuario_db.update = function (datos_usuario, id_usaurio, funcallback) {
 usuario_db.borrar = function (id_usuario, funCallback) {
     consulta = "DELETE FROM usuario WHERE id_usuario = ?";
     console.log(id_usuario)
+    const id_usuario = parseInt(id_usuario);
     connection.query(consulta, id_usuario, (err, result) => {
         if (err) {
             funCallback({ menssage: err.code, detail: err });//, undefined
